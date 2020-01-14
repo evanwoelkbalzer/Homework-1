@@ -1,0 +1,140 @@
+---
+title: "Evan WB - Homework 1"
+author: "Evan Woelk Balzer"
+date: "07/01/2020"
+output:
+  word_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+```{r Loading in packages}
+library(tidyverse)
+library(matrixStats)
+```
+
+#Question 1#
+```{r Generating vectors for each strain}
+TsA <- c(0.17, 0.20, 0.13, 0.20, 0.24, 0.25, 0.15, 0.21, 0.21)
+TsA
+
+TsB <- c(0.47, 0.21, 0.34, 0.32, 0.33, 0.29, 0.18, 0.20, 0.25)
+TsB
+
+Cs <- c(0.44, 0.33, 0.37, 0.33, 0.31, 0.27, 0.22, 0.30, 0.28)
+Cs
+
+strains <- tibble(TsA, TsB, Cs)
+strains
+```
+
+#Question 2, 3#
+```{r Generating and comparing mean objects}
+mtsa <- mean(TsA)
+mtsb <- mean(TsB)
+mcs <- mean(Cs)
+
+mabdif <- (mtsb - mtsa)
+mabdif
+
+mcadif <- (mcs - mtsa)
+mcadif
+```
+The difference between the means of the two transgenic strains is 0.09222.
+The difference between the means of the transgenic strain A and the common strain is 1.1211.
+
+#Question 4#
+```{r Plotting a histogram}
+a <- ggplot(strains, aes(Cs))
+#getting the same breaks as given by the standard hist command#
+brx <- pretty(range(strains$Cs), n = nclass.Sturges(strains$Cs),min.n = 1)
+ggcommonhist <- a+geom_histogram(breaks = brx, alpha = 0.5, color = "black")+labs(x = "Concentration", y = "Count")+theme_classic()+scale_x_continuous(breaks = seq(0,1, 0.05))
+ggcommonhist
+```
+
+#Question 5#
+```{r Building the growth and peroxide vectors}
+Peroxide <- c(0.27, 0.21, 0.34, 0.32, 0.24, 0.29, 0.18, 0.20, 0.29)
+Growth.rate <- c(1.79, 1.01, 1.71, 1.89, 1.41, 1.15, 1.13, 1.20, 1.10)
+pergro <- tibble(Peroxide, Growth.rate)
+```
+
+#Question 6#
+```{r Plotting hydrogen peroxide against fungal growth}
+b <- ggplot(pergro, aes(Peroxide, Growth.rate))
+pergroscatter <- b+geom_point()+theme_classic()+labs(x = "Hydrogen Peroxide Concentration (μmoles/g)", y = "Growth Rate (cm/day)")+geom_smooth(method='lm')
+pergroscatter
+```
+
+#Question 7#
+
+As the concentration of hydrogen peroxide increases, so does the growth rate of the fungus. This result contradicts the hypothesis, suggesting that this application of hydrogen peroxide promotes fungal growth.
+
+#Question 8, 9#
+```{r Reading in the turtle data and making individual contingency tables}
+trep <- read_csv("turtle_reproduction.csv", col_names = (TRUE), col_types = cols(Nesting_Success = "f", Species = "f"))
+contingency_trep <- table(trep)
+contingency_trep
+```
+
+#Question 10#
+```{r }
+b <- ggplot(trep, aes(x = Species, fill = Nesting_Success))
+turtletable <- b+geom_bar(position = "dodge")+scale_fill_manual(name = "Nesting Outcome", values = c("green4", "firebrick3"))+theme_classic()+scale_y_continuous("Number of Nesting Attempts")
+turtletable
+```
+
+#Question 11#
+```{r Finding the mean and standard deviation for successes}
+asd<- table(trep)
+asd
+
+samean <-rowMeans(asd)
+samean
+
+sasd <- rowSds(asd)
+sasd
+```
+Across all three species, the mean number of nesting successes is 8 the standard deviation of nesting success is 6.928.
+
+#Question 12#
+```{r Finding the proportion of successful nesting attempts for each species}
+propOR <- prop.table(contingency_trep[1:2, "Olive Ridley"])
+propOR
+
+propH <- prop.table(contingency_trep[1:2, "Hawksbill"])
+propH
+
+propL <- prop.table(contingency_trep[1:2, "Leatherback"])
+propL
+```
+Of the three species, the Hawksbill nests experienced the highest nest attempt abortion proportion: 0.43. Since this species seems to be having the least nesting success of the three, I would prioritize it for a conservation response.
+
+#Question 13#
+```{r reading in the egg count data}
+scramble <- read_csv("scrambled_eggs.csv", col_names = (TRUE), col_types = cols(Nest = "f", Species = "f", Eggs = "d"))
+scramble
+```
+
+#Question 14#
+```{r Generating boxplots to compare the number of eggs in each species nests}
+d <- ggplot(scramble, aes(x = Species, y = Eggs, fill = Species))
+box_of_eggs <-d+geom_boxplot(position = "dodge", show.legend = FALSE)+theme_classic()+geom_jitter(width=0.1,alpha=0.2)+theme(legend.position = "none")+scale_y_continuous("Number of Eggs per Nest")
+box_of_eggs
+```
+
+
+#Question 15#
+```{r Plotting Leatherback against Hawksbill Egg Counts}
+eggscramble <- read_csv("leatherhawk_eggs.csv", col_names = (TRUE), col_types = cols(Hawksbill = "d", Leatherback = "d", Nest = "f"))
+eggscramble
+
+e <- ggplot(eggscramble, aes(x = Hawksbill, y = Leatherback, color = Nest))
+LeatherHawk <- e+geom_point()+theme_classic()+scale_y_continuous("Number of Eggs per Leatherback Nest", limits = c(80, 160))+scale_x_continuous("Number of Eggs per Hawksbill Nest", limits = c(80,160))
+LeatherHawk
+```
